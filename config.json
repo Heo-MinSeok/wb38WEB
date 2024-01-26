@@ -1,0 +1,24 @@
+
+{
+    "db_server": 
+    {
+        "host": "10.101.169.86",
+        "database": "wb38",
+        "user": "root",
+        "password": "1234",
+        "dateStrings": "date",
+        "connectionLimit": 10
+    },
+
+    "server":
+    {
+        "port" : 8080,
+        "path" : "./public/"
+    },
+
+    "jwt":
+    {
+        "ACCESS_TOKEN_SECRET": "뭘로하지"
+    }
+
+}

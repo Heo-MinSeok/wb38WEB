@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>회원가입</title>
+  <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+<body>
+
+  <form>
+
+    <h2>회원가입</h2>
+
+    <label for="studentNumber">학번:</label>
+    <input type="text" id="studentNumber" maxlength="9" name="studentNumber" required>
+
+    <label for="password">비밀번호:</label>
+    <input type="password" id="password" maxlength="20" name="password" required>
+
+    <label for="name">이름:</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="birthday">생년월일:</label>
+    <input type="text" id="birthday" name="birthday" required>
+
+
+    <div>
+      <label for="gender">성별:</label>
+      <label class="gender-label"><input type="radio" name="gender" value="남자" required> 남성</label>
+      <label class="gender-label"><input type="radio" name="gender" value="여자" required> 여성</label>
+    </div>
+
+    <div>
+      <label for="profilePic">얼굴 사진:</label>
+      <video id="webcam" autoplay></video>
+    </div>
+
+    <div>
+      <canvas id="capturedImage" style="display: none;"></canvas>
+      <img id="preview" src="#">
+    </div>
+    <div>
+      <input type="file" id="profilePic" name="profilePic" accept="image/*" onchange="previewImage(event)">
+    </div>
+
+    <div style="display: inline-block; margin: 0 5px;">
+      <button type="button" onclick="captureImage()">웹캠 캡처</button>
+      <button type="button" onclick="DBInsert()">가입하기</button>
+
+    </div>
+
+  </form>
+
+  <script>
+    const video = document.getElementById('webcam');
+    const canvas = document.getElementById('capturedImage');
+    const context = canvas.getContext('2d');
+    const preview = document.getElementById('preview');
+    
+
+    async function initCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (error) {
+        console.error('웹캠 액세스에 실패했습니다:', error);
+      }
+    }
+
+    function captureImage() {
+      // 캔버스의 표시 크기를 설정합니다.
+      canvas.style.width = video.width + "px";
+      canvas.style.height = video.height + "px";
+
+      // 캔버스의 실제 크기를 비디오의 크기에 맞게 설정합니다.
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // 이미지를 다운로드하거나 서버에 업로드하는 등의 작업을 수행할 수 있습니다.
+      // 여기서는 이미지를 미리보기에 표시합니다.
+      preview.src = canvas.toDataURL('image/png');
+      preview.style.display = 'block';
+    }
+
+    function previewImage(event) {
+      var input = event.target;
+      var reader = new FileReader();
+      reader.onload = function () {
+        preview.src = reader.result;
+        preview.style.display = 'block';
+      };
+      if (input.files[0]) {
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        preview.src = "#";
+      }
+    }
+
+    // 페이지 로드 시 웹캠 초기화
+    initCamera();
+
+    function DBInsert() {
+      var stunum = document.getElementById("studentNumber").value;
+      var pw = document.getElementById("password").value;
+      var name = document.getElementById("name").value;
+      var birthday = document.getElementById("birthday").value;
+      var genderRadios = document.getElementsByName("gender");
+      var stuface = document.getElementById("preview").src;
+
+      var selectedGender;
+    for (var i = 0; i < genderRadios.length; i++) {
+        if (genderRadios[i].checked) {
+            selectedGender = genderRadios[i].value;
+            break;
+        }
+    }
+     
+        fetch('/join',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stunum: stunum, pw: pw, name: name, birthday: birthday, gender: selectedGender, faceimg: stuface })
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+            alert(data.message);
+            Join();
+          })
+          .catch(error => {
+            console.error(error);
+            alert('등록 중 오류가 발생했습니다.');
+          });
+      };
+
+      function Join() {
+        window.location.href = '/join'
+      }
+  </script>
+
+</body>
+
+</html>
