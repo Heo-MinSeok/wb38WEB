@@ -226,16 +226,26 @@
 
                     $('#calendar').fullCalendar({
                         header: {
-                            left: 'prevYear, prev',
+                            left: 'prevYear, prev, calenderform, excelform',
                             center: 'title',
-                            right: 'customButton, today, next,nextYear'
+                            right: 'excel, today, next,nextYear'
                         },
                         customButtons: {
-                            customButton: {
+                            excel: {
                                 text: '엑셀 다운',
                                 click: function () {
                                     // 엑셀 다운로드 버튼 클릭 시
                                     excelDownloadFromCalendar(selectedMonth);
+                                }
+                            },
+                            calenderform: {
+                                text: '달력 형식',
+                              
+                            },
+                            excelform: {
+                                text: '엑셀 형식',
+                                click: function () {
+                                    ReplaceLink(window.location.href, '/check', '/checklist')
                                 }
                             }
                         },
@@ -246,6 +256,7 @@
                         viewRender: function (view, element) {
                             // 현재 렌더링된 년월 정보를 가져와서 selectedMonth 변수에 저장
                             selectedMonth = view.intervalStart.format('YYYY-MM');
+                            $('.fc-calenderform-button').addClass('fc-state-disabled');
                         },
                         // 날짜 클릭 이벤트 핸들러 추가
                         dayClick: function (date, jsEvent, view) {

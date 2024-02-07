@@ -133,9 +133,11 @@ exports.CheckLog = async (req,res) => {
         const connection = await pool.getConnection();
         const result = await connection.query(`SELECT user_check.stunum, user.name, user_check.date, user_check.state
         FROM user_check
-        INNER JOIN user ON user_check.stunum = ${req.params.stunum}
+        INNER JOIN user ON user_check.stunum = user.stunum
         WHERE user_check.date >= '${req.body.startdate} 00:00:00'
-          AND user_check.date <= '${req.body.enddate} 23:59:59';`);
+          AND user_check.date <= '${req.body.enddate} 23:59:59'
+          AND user.stunum  = ${req.params.stunum};`
+          );
         connection.release();
         console.log(result);
         const jsonS = JSON.stringify(result);

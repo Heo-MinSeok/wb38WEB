@@ -33,6 +33,7 @@
         <ul>
             <li><a href="#" id="personalAttendance">출석</a></li>
             <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
             <li><a href="#" id="file">파일</a></li>
         </ul>
     </nav>
@@ -62,13 +63,14 @@
     </main>
 
     <script>
-        const contentDiv = document.getElementById('content');
+             const contentDiv = document.getElementById('content');
         const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
         const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
         const logoutBtn = document.getElementById('logoutBtn');
         const homeBtn = document.getElementById('homeBtn');
         const fileBtn = document.getElementById('file');
-
+        var calendarEl = document.getElementById('calendar');
 
         editInfoLink.addEventListener('click', function () {
             ReplaceLink(window.location.href, '/checklist', '/editinfo')
@@ -77,6 +79,11 @@
         personalAttendanceLink.addEventListener('click', function () {
             ReplaceLink(window.location.href, '/checklist', '/check')
         });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/checklist', '/allcheck');
+        });
+
 
         fileBtn.addEventListener('click', function () {
             ReplaceLink(window.location.href, '/checklist', '/files');
@@ -98,7 +105,14 @@
                 window.location.href = link.replace(mlink, plink)
             }
         }
+      //   #출석색상코드#
+      const check = '#28a745';
+        const late = '#FFD400'
 
+        const classIn = '#4169E1'
+        const classOut = '#FF7F50'
+
+        let selectedMonth = null; // 선택된 월을 저장할 변수
     </script>
 
     <script>
