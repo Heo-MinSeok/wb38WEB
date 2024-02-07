@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+<body>
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+    
+    <div id="content">
+        <img id="mainImage" src="https://usagif.com/wp-content/uploads/2021/4fh5wi/welcome-15.gif">
+    </div>
+
+    <script>
+
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const logoutBtn = document.getElementById('logoutBtn');                            
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file'); 
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/mypage');
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check');
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck');
+        });
+
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files');
+        });
+
+        logoutBtn.addEventListener('click', function () {
+            // 실제로는 서버에서 세션을 삭제하고 로그아웃 처리해야 함
+            alert('로그아웃 되었습니다.');
+            window.location.href = '/'; // 로그아웃 후 로그인 페이지로 이동 (실제로는 서버에서 리다이렉트를 수행)
+        });
+       
+        homeBtn.addEventListener('click', function () {
+            
+        });
+
+        
+
+        function ReplaceLink(link, plink)
+        {
+            if(link.includes('#'))
+            {
+                window.location.href = link.replace("#", plink)
+            }
+            else
+            {
+                window.location.href = link+plink
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+<body>
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+    
+    <div id="content">
+        <img id="mainImage" src="https://usagif.com/wp-content/uploads/2021/4fh5wi/welcome-15.gif">
+    </div>
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+            <img src="/public/files/footerlogo.png">
+            <span>우송비트 교육센터</span>
+        </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+
+    <script>
+
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const logoutBtn = document.getElementById('logoutBtn');                            
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file'); 
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/editinfo');
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check');
+        });
+
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files');
+        });
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+       
+        homeBtn.addEventListener('click', function () {
+            window.location.href = window.location.href
+        });
+
+        function ReplaceLink(link, plink)
+        {
+            if(link.includes('#'))
+            {
+                window.location.href = link.replace("#", plink)
+            }
+            else
+            {
+                window.location.href = link+plink
+            }
+        }
+    </script>
+
+</body>
+
+</html>

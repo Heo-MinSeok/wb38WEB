@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <!-- jQuery 라이브러리 불러오기 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+<body>
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <div id="content">
+        <input type="date" id="datePicker">
+        <button onclick="GetData()" style="background-color: #3498db; color: #fff;">조회</button>
+        <button onclick="printPage()" style="background-color: #3498db; color: #fff;">출석 인쇄</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>학번</th>
+                    <th>이름</th>
+                    <th>출석 여부</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody">
+                <!-- 데이터는 여기에 동적으로 추가될 것입니다 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file');
+
+        // 전체 출석 현황 페이지의 JavaScript 실행
+        const datePicker = document.getElementById('datePicker');
+        const attendanceBody = document.getElementById('attendanceBody');
+
+        // 오늘 날짜를 선택
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+        datePicker.value = todayString;
+
+        function GetData() {
+            const selectedDate = datePicker.value;
+
+            // 이전에 표시된 행 삭제
+            attendanceBody.innerHTML = '';
+
+            // 선택한 날짜에 해당하는 출석 현황 데이터를 가져옴 (예시 데이터)
+            fetch(`/attendanceall/get?date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 데이터를 테이블에 추가
+                    data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${student.stunum}</td>
+                        <td>${student.name}</td>
+                        <td>${student.date}</td>  `;
+                        attendanceBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching attendance data:', error));
+        }
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/mypage')
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/check')
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/allcheck');
+        });
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/files');
+        });
+
+
+        logoutBtn.addEventListener('click', function () {
+            // 실제로는 서버에서 세션을 삭제하고 로그아웃 처리해야 함
+            alert('로그아웃 되었습니다.');
+            window.location.href = '/'; // 로그아웃 후 로그인 페이지로 이동 (실제로는 서버에서 리다이렉트를 수행)
+        });
+
+        homeBtn.addEventListener('click', function () {
+
+        });
+        function ReplaceLink(link, mlink, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace(mlink + "#", plink)
+            }
+            else {
+                window.location.href = link.replace(mlink, plink)
+            }
+        }
+    </script>
+
+</body>
+
+</html>

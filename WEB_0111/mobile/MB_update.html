@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>민석이와IDLE</title>
+    <!-- FullCalendar 라이브러리 스크립트 및 스타일 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+    <!-- FullCalendar 한국어 언어 파일 불러오기 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/ko.js"></script>
+
+    <link rel="stylesheet" href="/public/css/mobile.css">
+
+
+</head>
+<script>
+    function GetData() {
+        // 서버로 POST 요청 보내기
+        fetch(window.location.pathname, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 서버 응답을 처리          
+                document.getElementById("studentNumber").value = data[0].stunum;
+                document.getElementById("password").value = data[0].pw;
+                document.getElementById("name").value = data[0].name;
+                document.getElementById("birthdate").value = data[0].birthday;
+
+                if(data[0].gender == '남자')
+                {
+                    document.getElementById("male").checked = true;
+                }
+                else
+                {
+                    document.getElementById("female").checked = true;
+                }
+
+                const bufferData = data[0].faceimg; // 서버에서 전달된 Blob 이미지 데이터
+                const blobData = new Blob([bufferData], { type: 'image/jpeg' });
+                const blobUrl = URL.createObjectURL(blobData);
+                document.getElementById('preview').src = bufferData// 여기에서 이미지 타입(png, jpeg 등)에 따라서 수정해야 합니다.
+            })
+            .catch(error => {
+                console.error('에러 발생:', error);
+            });
+    };
+    //파일 불러오기
+    function handleFileSelect(event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+
+        reader.onload = function (e) {
+            var contents = e.target.result;
+            document.getElementById('StuFace').src = contents;
+        }
+        reader.readAsDataURL(file);
+    };
+
+    function GetMain() {
+        fetch(window.location.pathname)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text(); // HTML 페이지를 텍스트로 읽어오기
+            })
+            .then(htmlText => {
+                // 받아온 HTML 페이지를 사용하거나 처리하기
+                console.log('받아온 HTML 페이지:', htmlText);
+
+                // 예제: 받아온 HTML을 현재 페이지에 표시하기
+                document.body.innerHTML = htmlText;
+                var WLH = window.location.pathname.replace('/mypage', '')
+                window.location.href = WLH;
+            })
+            .catch(error => {
+                console.error('에러 발생:', error);
+            });
+    };
+</script>
+
+<body onload="GetData()">
+    <header>
+        <button id="homeBtn">
+            <span class="black">민석이와</span>
+            <span class="red">I</span>
+            <span class="orange">D</span>
+            <span class="green">L</span>
+            <span class="blue">E</span></button>
+        <span><button id="logoutBtn">로그아웃</button></span>
+    </header>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a id="personalAttendance">출석</a></li>
+            <li><a id="editInfo">개인 정보 수정</a></li>
+            <li><a id="details">전체 출석 현황</a></li>
+            <li><a id="details">파일</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <h2>회원 정보</h2>
+        <div>
+            <label for="studentNumber">학번</label>
+            <input type="text" id="studentNumber" readonly="readonly" name="studentNumber" required>
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" maxlength="20" minlength="4" placeholder="현재 비밀번호" name="password"
+                required pattern="^[a-zA-Z0-9!@#$%^*()_+]*$">
+            <label for="newpassword">새 비밀번호</label>
+            <input type="password" id="newpassword" maxlength="20" minlength="4" placeholder="새 비밀번호" name="newpassword"
+                required pattern="^[a-zA-Z0-9!@#$%^*()_+]*$">
+
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" minlength="2" pattern="^[가-힣]{2,4}|[a-zA-Z]{2,10}\s[a-zA-Z]{2,10}"
+                required>
+
+            <label for="birthdate">생년월일</label>
+            <input type="text" id="birthdate" name="birthdate" maxlength="10" minlength="8">
+
+            <label for="gender">성별</label>
+            <label class="gender-label"><input type="radio" name="gender" id='male'value="남자" required> 남성</label>
+            <label class="gender-label"><input type="radio" name="gender" id='female' value="여자" required> 여성</label>
+        </div>
+
+        <div class="form-section file-upload">
+            <label for="profilePic">얼굴 사진</label>
+            <canvas id="capturedImage" style="display: none;"></canvas>
+            <input type="image" id="preview" src="">
+        </div>
+
+        <input type="file" id="fileInput" name="profilePic" accept="image/*" onchange="previewImage(event)">
+        <label for="fileInput" id="customButton">파일 선택</label>
+
+        <input type="submit" onclick="DBUpdate()" value="수정">
+    </main>
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const fileslink = document.getElementById('files');                             // 파일
+
+        logoutBtn.addEventListener('click', function () {
+            // 실제로는 서버에서 세션을 삭제하고 로그아웃 처리해야 함
+            alert('로그아웃 되었습니다.');
+            window.location.href = '/'; // 로그아웃 후 로그인 페이지로 이동 (실제로는 서버에서 리다이렉트를 수행)
+        });
+
+        homeBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, "")
+        });
+
+        editInfoLink.addEventListener('click', function () {
+            GetData();
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href ,'/check');
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href,'/allcheck');
+        });
+
+        fileslink.addEventListener('click', function() {
+            ReplaceLink(window.location.href, '/files');
+        })
+
+        // 파일 입력으로 이미지 미리보기
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                const img = document.getElementById('preview');
+                img.src = reader.result;
+            }
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        function inputNumberOnly(el) {
+            el.value = el.value.replace(/[^0-9]/g, '');
+        }
+
+        function DBUpdate() {
+            var stunum = document.getElementById("studentNumber").value;
+            var pw = document.getElementById("password").value;
+            var newpw = document.getElementById("newpassword").value;
+            var name = document.getElementById("name").value;
+            var birthday = document.getElementById("birthdate").value;
+            var faceimg = document.getElementById("preview").src;
+            var gender=null;
+
+            if(document.getElementById("male").checked == true)
+            {
+                gender = '남자'
+            }
+            else
+            {
+                gender = '여자'
+            }
+
+            // 서버로 데이터를 보내어 Update 수행
+            fetch(window.location.pathname +'/update',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stunum: stunum, pw: pw, newpw: newpw, name: name, gender: gender, birthday: birthday, faceimg: faceimg })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    alert(data.message);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('등록 중 오류가 발생했습니다.');
+                });
+        };
+        
+        function ReplaceLink(link, plink)
+        {
+            if(link.includes('#'))
+            {
+                window.location.href = link.replace('/mypage' + "#" , plink)
+            }
+            else
+            {
+                window.location.href = link.replace('/mypage', plink)
+            }
+        }
+    </script>
+</body>
+
+</html>

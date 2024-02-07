@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="/public/css/mobile.css">
+
+</head>
+
+<body onload="loadFileList()">
+    <header>
+        <button id="homeBtn">
+            <span class="black">민석이와</span>
+            <span class="red">I</span>
+            <span class="orange">D</span>
+            <span class="green">L</span>
+            <span class="blue">E</span>
+        </button>
+        <span><button id="logoutBtn">로그아웃</button></span>
+    </header>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a id="personalAttendance">출석</a></li>
+            <li><a id="editInfo">개인 정보 수정</a></li>
+            <li><a id="details">전체 출석 현황</a></li>
+            <li><a id="files">파일</a></li>
+        </ul>
+    </nav>
+
+    <section class="file-section">
+        <ul id="fileList">
+            <!-- 업로드된 파일 목록이 여기에 표시됩니다 -->
+        </ul>
+        
+    </section>
+
+    
+<section class="file-section" >
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" required>
+        <input type="submit" value="업로드">
+    </form>
+</section>
+
+
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+                <img src="/public/files/footerlogo.png">
+                <span>우송비트 교육센터</span>
+            </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const fileslink = document.getElementById('files');                             // 파일
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+
+        homeBtn.addEventListener('click', function () {
+            // 홈으로 이동하는 코드를 여기에 추가
+            ReplaceLink(window.location.href, '');
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check');
+        });
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/editinfo');
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck');
+        });
+
+        fileslink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files');
+        })
+
+        function ReplaceLink(link, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace("/files/#", plink)
+            }
+            else {
+                window.location.href = link.replace('/files', plink)
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch('/fileupload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadFileList();
+                })
+                .catch((error) => {
+                    alert('업로드 에러:', data.message);
+                });
+        });
+
+        function loadFileList() {
+            fetch('/filelist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(files => {
+                    var fileListElement = document.getElementById('fileList');
+                    fileListElement.innerHTML = '';
+
+                    files.forEach(file => {
+                        if (file == '.DS_Store') {
+                            return;
+                        }
+                        var li = document.createElement('li');
+                        li.textContent = file;
+
+                        var div = document.createElement('div');
+                        // 다운로드 링크 추가
+
+                        // 파일 이름과 확장자 추출
+                        var fileName = file.split('.').shift();
+                        var fileExtension = file.split('.').pop();
+
+                        var downloadLink = document.createElement('a');
+                        downloadLink.download = fileName + '.' + fileExtension;
+                        downloadLink.href = '/public/files/' + encodeURIComponent(file);
+                        downloadLink.textContent = '다운로드';
+
+                        // li 엘리먼트에 추가
+                        div.appendChild(downloadLink);
+
+                        li.appendChild(div);
+
+                        // fileList에 li 엘리먼트 추가
+                        fileListElement.appendChild(li);
+                    });
+                })
+                .catch((error) => {
+                    console.error('파일 목록 로드 에러:', error);
+                });
+        }
+
+    </script>
+</body>
+
+</html>

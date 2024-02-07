@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>민석이와IDLE</title>
+    <!-- FullCalendar 라이브러리 스크립트 및 스타일 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+    <!-- FullCalendar 한국어 언어 파일 불러오기 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/ko.js"></script>
+
+    <link rel="stylesheet" href="/public/css/mobile.css">
+
+</head>
+
+<body>
+    <header>
+        <button id="homeBtn">
+            <span class="black">민석이와</span>
+            <span class="red">I</span>
+            <span class="orange">D</span>
+            <span class="green">L</span>
+            <span class="blue">E</span></button>
+        <span><button id="logoutBtn">로그아웃</button></span>
+    </header>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a id="personalAttendance">출석</a></li>
+            <li><a id="editInfo">개인 정보 수정</a></li>
+            <li><a id="details">전체 출석 현황</a></li>
+            <li><a id="files">파일</a></li>
+        </ul>
+    </nav>
+
+    <img id="mainImage" src="https://usagif.com/wp-content/uploads/2021/4fh5wi/welcome-15.gif">
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+            <img src="/public/files/footerlogo.png">
+            <span>우송비트 교육센터</span>
+        </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const fileslink = document.getElementById('files');                             // 파일
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+
+        homeBtn.addEventListener('click', function () {
+            window.location.href = window.location.href;
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check');
+        });
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/editinfo');
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck');
+        });
+
+        fileslink.addEventListener('click', function() {
+            ReplaceLink(window.location.href, '/files');
+        })
+
+        function ReplaceLink(link, plink)
+        {
+            if(link.includes('#'))
+            {
+                window.location.href = link.replace("#", plink)
+            }
+            else
+            {
+                window.location.href = link+plink
+            }
+        }
+    </script>
+</body>
+
+</html>

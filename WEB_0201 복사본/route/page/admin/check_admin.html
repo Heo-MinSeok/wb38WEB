@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+
+    <!-- jQuery 라이브러리 불러오기 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- FullCalendar 라이브러리 불러오기 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/ko.js"></script>
+
+    <!-- 엑셀 파일 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+</head>
+
+<body onload="GetData()">
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div id="content">
+            <div id="calendar"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+                <img src="/public/files/footerlogo.png">
+                <span>우송비트 교육센터</span>
+            </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+
+    <script>
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file');
+        var calendarEl = document.getElementById('calendar');
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/editinfo')
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/check')
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/allcheck');
+        });
+
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/files');
+        });
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+
+        homeBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '');
+        });
+        //   #출석색상코드#
+        const check = '#28a745';
+        const late = '#FFD400'
+
+        const classIn = '#4169E1'
+        const classOut = '#FF7F50'
+
+        let selectedMonth = null; // 선택된 월을 저장할 변수
+
+    </script>
+
+    <script>
+
+        function ReplaceLink(link, mlink, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace(mlink + "#", plink)
+            }
+            else {
+                window.location.href = link.replace(mlink, plink)
+            }
+        }
+
+        // FullCalendar에서 선택된 월에 해당하는 이벤트 정보를 가져와서 엑셀 파일로 다운로드하는 함수
+        function excelDownloadFromCalendar(selectedMonth) {
+            const events = $('#calendar').fullCalendar('clientEvents').filter(function (event) {
+                return event.start.format('YYYY-MM') === selectedMonth;
+            }).map(function (event) {
+                return [new Date(event.start).toLocaleString(), event.title]; // 이벤트 정보를 배열로 반환
+            });
+
+            // 월에 해당하는 파일 이름 생성
+            const fileName = selectedMonth + '월 출석.xlsx';
+
+            // 엑셀 파일 생성
+            const wb = XLSX.utils.book_new(); // 워크북 생성
+            const ws = XLSX.utils.aoa_to_sheet([['일시', '구분'], ...events]); // 시트 생성
+
+            // 시트의 넓이 조절
+            const wscols = [
+                { wch: 25 },
+                { wch: 10 }, // 첫 번째 열의 넓이를 15로 설정
+            ];
+            ws['!cols'] = wscols;
+
+            // 워크북에 시트 추가
+            XLSX.utils.book_append_sheet(wb, ws, 'Events');
+
+            // 엑셀 파일 다운로드
+            XLSX.writeFile(wb, fileName);
+        }
+
+
+        function GetData() {
+            // 서버로 POST 요청 보내기
+            fetch(window.location.pathname, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // 서버 응답을 처리          
+                    const eventsArray = [];
+                    // 퇴근 시간 기준 설정
+                    const leavingTime = 21 * 60 + 30; // 21시 30분을 분으로 환산
+
+                    // 결과를 담을 객체
+                    const result = {};
+
+                    // 데이터 배열 순회
+                    for (const entry of data) {
+                        const date = entry.date.split(' ')[0]; // 날짜만 추출
+                        const state = entry.state;
+
+                        // 날짜별로 결과 객체에 초기화
+                        if (!result[date]) {
+                            result[date] = { arrive: null, leave: null };
+                        }
+
+                        const time = new Date(entry.date).getHours() * 60 + new Date(entry.date).getMinutes(); // 현재 시간을 분으로 환산
+
+                        // 입실 상태일 때
+                        if (state === 1) {
+                            // 출근 기록이 없다면 현재 기록을 출근 시간으로 설정
+                            if (result[date].arrive == null) {
+                                result[date].arrive = time;
+
+                                checkTime = new Date(entry.date);
+
+
+                                const year = checkTime.getFullYear();
+                                const month = checkTime.getMonth(); // 월은 0부터 시작하므로 1을 더해야 함
+                                const day = checkTime.getDate();
+
+                                // 새로운 Date 객체를 오늘의 9시로 설정
+                                const lateTime = new Date(year, month, day, 9, 1, 0, 0);
+
+                                const eventObject = {
+                                    title: checkTime >= lateTime ? '지각' : '출석',
+                                    start: entry.date,
+                                    color: checkTime >= lateTime ? late : check,
+                                };
+                                eventsArray.push(eventObject);
+                            }
+                            else {
+                                const eventObject = {
+                                    title: '입실',
+                                    start: entry.date,
+                                    color: classIn,
+                                };
+                                eventsArray.push(eventObject);
+                            }
+                        }
+                        // 퇴실 상태일 때
+                        else if (state === 0) {
+                            // 퇴근 기록이 없다면 현재 기록을 퇴근 시간으로 설정
+                            if (result[date].leave == null && time >= leavingTime) {
+                                result[date].leave = time;
+                                const eventObject = {
+                                    title: '하교',
+                                    start: entry.date,
+                                    color: "#FF0000",
+                                };
+                                eventsArray.push(eventObject);
+
+                            }
+                            else {
+                                const eventObject = {
+                                    title: '퇴실',
+                                    start: entry.date,
+                                    color: classOut,
+                                };
+                                eventsArray.push(eventObject);
+                            }
+                        }
+                    }
+
+                    $('#calendar').fullCalendar({
+                        header: {
+                            left: 'prevYear, prev',
+                            center: 'title',
+                            right: 'customButton, today, next,nextYear'
+                        },
+                        customButtons: {
+                            customButton: {
+                                text: '엑셀 다운',
+                                click: function () {
+                                    // 엑셀 다운로드 버튼 클릭 시
+                                    excelDownloadFromCalendar(selectedMonth);
+                                }
+                            }
+                        },
+
+                        events: eventsArray,
+
+                        // 월이 변경될 때 호출되는 이벤트 핸들러
+                        viewRender: function (view, element) {
+                            // 현재 렌더링된 년월 정보를 가져와서 selectedMonth 변수에 저장
+                            selectedMonth = view.intervalStart.format('YYYY-MM');
+                        },
+                        // 날짜 클릭 이벤트 핸들러 추가
+                        dayClick: function (date, jsEvent, view) {
+                            // 클릭한 날짜에 대한 출석 정보를 가져옴
+                            const events = $('#calendar').fullCalendar('clientEvents', function (event) {
+                                return event.start.isSame(date, 'day');
+                            });
+
+                            // 팝업 창이 이미 열려 있는지 확인하고, 있다면 닫기
+                            if (window.popupWindow && !window.popupWindow.closed) {
+                                window.popupWindow.close();
+                            }
+                            // 클릭한 날짜에 출석 이벤트가 있으면 팝업 창에 출석 세부 정보 표시
+                            if (events.length > 0) {
+                                // 팝업 창의 가로 및 세로 크기
+                                const width = 500;
+                                const height = 500;
+                                // 화면의 중앙 좌표 계산
+                                const left = (window.innerWidth - width) / 2;
+                                const top = (window.innerHeight - height) / 2;
+
+                                // 팝업 창 열기
+                                const popupWindow = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top}`);
+                                popupWindow.document.write('<div style="text-align: center;"><h2>' + date.format('YYYY-MM-DD') + '</h2></div>');
+                                events.forEach(function (event) {
+                                    const attendancetitle = event.title || '없음';
+                                    const attendancedate = new Date(event.start) || '없음';
+
+                                    // 시간대를 한국 시간대로 설정합니다.
+                                    attendancedate.setUTCHours(attendancedate.getUTCHours() - 9);
+
+                                    popupWindow.document.body.style.background = 'linear-gradient(45deg, #b3e0ff, #d1cfff)';
+                                    popupWindow.document.write(`<div style="overflow-y: auto; max-height: 75%; padding: 10px; border: 1px solid #ccc; margin-bottom: 10px; padding: 20px; background-color: ${event.color}; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); margin: 20px; text-align: left;">`);
+                                    popupWindow.document.write('<p>' + attendancedate.toLocaleString() + ' : ' + attendancetitle + '</p>');
+                                    //.split('. ')[3]
+                                    popupWindow.document.write('</div>');
+                                });
+                                // 열린 팝업 창을 전역 변수에 저장
+                                window.popupWindow = popupWindow;
+                            } else {
+                                // 클릭한 날짜에 출석 이벤트가 없는 경우 알림 창을 표시
+                                alert('선택한 날짜에 출결이 없습니다.');
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('에러 발생:', error);
+                });
+        };
+
+    </script>
+
+</body>
+
+</html>

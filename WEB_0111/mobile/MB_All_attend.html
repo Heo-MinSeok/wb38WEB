@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>민석이와IDLE</title>
+    <!-- FullCalendar 라이브러리 스크립트 및 스타일 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+
+    <!-- FullCalendar 한국어 언어 파일 불러오기 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/ko.js"></script>
+    <link rel="stylesheet" href="/public/css/mobile.css">
+
+</head>
+
+<body>
+    <header>
+        <button id="homeBtn">
+            <span class="black">민석이와</span>
+            <span class="red">I</span>
+            <span class="orange">D</span>
+            <span class="green">L</span>
+            <span class="blue">E</span></button>
+        <span><button id="logoutBtn">로그아웃</button></span>
+    </header>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a id="personalAttendance">출석</a></li>
+            <li><a id="editInfo">개인 정보 수정</a></li>
+            <li><a id="details">전체 출석 현황</a></li>
+            <li><a id="files">파일</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <input type="date" id="datePicker">
+        <button onclick="GetData()" style="background-color: #3498db; color: #fff;">조회</button>
+        <button onclick="printPage()" style="background-color: #3498db; color: #fff;">출석 인쇄</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>학번</th>
+                    <th>이름</th>
+                    <th>출석 여부</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody">
+                <!-- 데이터는 여기에 동적으로 추가될 것입니다 -->
+            </tbody>
+        </table>
+    </main>
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const fileslink = document.getElementById('files');                             // 파일
+
+        logoutBtn.addEventListener('click', function () {
+            // 실제로는 서버에서 세션을 삭제하고 로그아웃 처리해야 함
+            alert('로그아웃 되었습니다.');
+            window.location.href = '/'; // 로그아웃 후 로그인 페이지로 이동 (실제로는 서버에서 리다이렉트를 수행)
+        });
+
+        homeBtn.addEventListener('click', function () {
+            // 홈으로 이동하는 코드를 여기에 추가
+            ReplaceLink(window.location.href, '');
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check');
+        });
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/mypage');
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck');
+        });
+
+        fileslink.addEventListener('click', function() {
+            ReplaceLink(window.location.href, '/files');
+        })
+
+        function ReplaceLink(link, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace("/allcheck/#", plink)
+            }
+            else {
+                window.location.href = link.replace('/allcheck', plink)
+            }
+        }
+
+        function createTable(header, data) {
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // 생성한 표에 헤더 추가
+            const headerRow = document.createElement('tr');
+            header.forEach(column => {
+                const th = document.createElement('th');
+                th.textContent = column;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+
+            // 생성한 표에 데이터 추가
+            data.forEach(rowData => {
+                const tr = document.createElement('tr');
+                rowData.forEach(cellData => {
+                    const td = document.createElement('td');
+                    td.textContent = cellData;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+
+            return table;
+        }
+
+        // 전체 출석 현황 페이지의 JavaScript 실행
+        const datePicker = document.getElementById('datePicker');
+        const attendanceBody = document.getElementById('attendanceBody');
+
+        // 오늘 날짜를 선택
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+        datePicker.value = todayString;
+
+        function GetData() {
+            const selectedDate = datePicker.value;
+
+            // 이전에 표시된 행 삭제
+            attendanceBody.innerHTML = '';
+
+            // 선택한 날짜에 해당하는 출석 현황 데이터를 가져옴 (예시 데이터)
+            fetch(`/attendanceall/get?date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 데이터를 테이블에 추가
+                    data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${student.stunum}</td>
+                        <td>${student.name}</td>
+                        <td>${student.date}</td>  `;
+                        attendanceBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching attendance data:', error));
+            }
+
+        function printPage() {
+            window.print();
+        }
+
+
+    </script>
+</body>
+
+</html>

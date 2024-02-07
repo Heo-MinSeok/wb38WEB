@@ -1,0 +1,173 @@
+<script>
+    // 주어진 데이터 배열
+    const data = [
+    { date: '2024-01-08 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-08 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-08 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-08 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-09 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-09 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-09 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-09 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-10 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-10 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-10 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-10 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-11 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-11 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-11 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-11 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-12 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-12 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-12 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-12 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-15 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-15 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-15 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-15 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-16 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-16 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-16 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-16 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-17 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-17 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-17 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-17 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-18 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-18 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-18 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-18 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-19 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-19 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-19 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-19 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-22 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-22 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-22 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-22 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-23 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-23 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-23 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-23 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-24 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-24 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-24 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-24 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-25 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-25 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-25 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-25 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-26 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-26 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-26 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-26 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-29 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-29 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-29 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-29 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-30 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-30 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-30 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-30 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-31 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-31 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-01-31 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-01-31 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-01 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-01 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-01 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-01 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-02 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-02 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-02 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-02 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-05 08:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-05 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-05 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-05 22:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-06 12:00:00.000', stunum: 201910756, state: 0 },
+  { date: '2024-02-06 13:30:00.000', stunum: 201910756, state: 1 },
+  { date: '2024-02-06 15:18:48.934', stunum: 201910756, state: 1 },
+  { date: '2024-02-06 15:22:25.541', stunum: 201910756, state: 0 },
+  { date: '2024-02-06 15:22:57.315', stunum: 201910756, state: 1 }
+    ]
+
+    // 퇴근 시간 기준 설정
+    const leavingTime = 21 * 60 + 30; // 21시 30분을 분으로 환산
+
+    // 결과를 담을 객체
+    const result = {};
+
+    // 데이터 배열 순회
+    for (const entry of data) {
+        const date = entry.date.split(' ')[0]; // 날짜만 추출
+        const state = entry.state;
+
+        // 날짜별로 결과 객체에 초기화
+        if (!result[date]) {
+            result[date] = { arrive: null, leave: null };
+        }
+
+        const time = new Date(entry.date).getHours() * 60 + new Date(entry.date).getMinutes(); // 현재 시간을 분으로 환산
+
+        // 입실 상태일 때
+        if (state == 1) {
+            // 출근 기록이 없다면 현재 기록을 출근 시간으로 설정
+            if (result[date].arrive == null) {
+                result[date].arrive = time;
+            }
+        }
+        // 퇴실 상태일 때
+        else if (state == 0) {
+            // 퇴근 기록이 없다면 현재 기록을 퇴근 시간으로 설정
+            if (result[date].leave == null && time >= leavingTime) {
+                result[date].leave = time;
+            }
+        }
+    }
+
+    // 결과 출력
+    console.log(result);
+    for (const date in result) {
+        if (result.hasOwnProperty(date)) {
+            const arriveTime = result[date].arrive;
+
+            // arriveTime이 null이 아니라면 날짜 형식으로 변환합니다.
+            let formattedArriveTime;
+
+
+            if (arriveTime !== null) {
+                // arriveTime을 밀리초 단위로 변환합니다.
+                const arriveMilliseconds = new Date(date + "T00:00:00Z").getTime() + arriveTime * 60000;
+
+                // 변환된 시간을 Date 객체로 생성합니다.
+                const arriveDate = new Date(arriveMilliseconds);
+
+                // Date 객체를 원하는 형식의 문자열로 변환합니다.
+                formattedArriveTime = arriveDate.toISOString().replace("T", " ").replace(/\.\d+Z$/, "");
+            } else {
+                formattedArriveTime = null;
+            }
+            console.log(`Arrive: ${formattedArriveTime}`);
+
+            const LeavingTime = result[date].leave;
+            let formattedLeavingTime;
+            if (LeavingTime !== null) {
+
+                // arriveTime을 밀리초 단위로 변환합니다.
+                const leaveMilliseconds = new Date(date + "T00:00:00Z").getTime() + leavingTime * 60000;
+
+                // 변환된 시간을 Date 객체로 생성합니다.
+                const leaveDate = new Date(leaveMilliseconds);
+
+                // Date 객체를 원하는 형식의 문자열로 변환합니다.
+                formattedLeavingTime = leaveDate.toISOString().replace("T", " ").replace(/\.\d+Z$/, "");
+            }
+            else {
+                formattedLeavingTime = null;
+            }
+            console.log(`Leave: ${formattedLeavingTime}`);
+        }
+    }
+
+</script>

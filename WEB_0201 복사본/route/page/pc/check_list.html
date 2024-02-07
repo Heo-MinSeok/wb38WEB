@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+
+    <!-- jQuery 라이브러리 불러오기 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- FullCalendar 라이브러리 불러오기 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/locale/ko.js"></script>
+    <!-- 엑셀 파일 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+</head>
+
+<body onload="GetData()">
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <input type="date" id="datePicker_start"> ~ <input type="date" id="datePicker_end">
+        <button onclick="GetData()">조회</button>
+        <button onclick="printPage()">출석 인쇄</button>
+        <button onclick="exelDownloadByHtml()">엑셀</button>
+        <table id="myTable">
+            <thead>
+                <tr>
+                    <th>학번</th>
+                    <th>이름</th>
+                    <th>시간</th>
+                    <th>구분</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody">
+                <!-- 데이터는 여기에 동적으로 추가될 것입니다 -->
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file');
+
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/editinfo')
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/check')
+        });
+
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '/files');
+        });
+
+        logoutBtn.addEventListener('click', function () {
+            window.location.href = '/logout';
+        });
+
+        homeBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/check', '');
+        });
+
+        function ReplaceLink(link, mlink, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace(mlink + "#", plink)
+            }
+            else {
+                window.location.href = link.replace(mlink, plink)
+            }
+        }
+
+    </script>
+
+    <script>
+        // 전체 출석 현황 페이지의 JavaScript 실행
+        const datePicker_start = document.getElementById('datePicker_start'); // 날짜를 선택할 수 있는 입력 필드
+        const datePicker_end = document.getElementById('datePicker_end'); // 날짜를 선택할 수 있는 입력 필드
+        const attendanceBody = document.getElementById('attendanceBody');
+
+        // 오늘 날짜를 선택
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+        datePicker_start.value = todayString;
+        datePicker_end.value = todayString;
+
+
+        // 서버로부터 데이터를 가져와서 캘린더에 이벤트를 추가하는 함수
+        function GetData() {
+            // 서버로 POST 요청 보내기
+            fetch(window.location.pathname, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ startdate: datePicker_start.value, enddate: datePicker_end.value })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // 데이터를 테이블에 추가
+                    data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${student.stunum}</td>
+                        <td>${student.name}</td>
+                        <td>${student.date}</td>  
+                        <td>${student.state == 1 ? '입실' : '퇴실'}</td>  `;
+                        attendanceBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching attendance data:', error));
+        };
+
+        function printPage() {
+            window.print();
+        }
+
+        function exelDownloadByHtml() {
+            let filename = '전체출석_';
+
+            // 파일 이름에 선택된 날짜를 추가합니다
+            filename += datePicker_start.value + "~" + datePicker_end.value + '.xlsx';
+
+            // 'myTable' ID를 가진 테이블을 사용하도록 table_to_book 함수 수정
+            let wb = XLSX.utils.table_to_book(document.getElementById('myTable'), { sheet: 'attend', raw: true });
+            XLSX.writeFile(wb, filename);
+        }
+
+    </script>
+
+</body>
+
+</html>

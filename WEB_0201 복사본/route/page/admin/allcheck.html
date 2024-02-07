@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <!-- jQuery 라이브러리 불러오기 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- SheetJS 및 FileSaver 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+<body>
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div id="content">
+
+            <input type="date" id="datePicker_start"> ~ <input type="date" id="datePicker_end">
+            <button onclick="GetData()">조회</button>
+
+            <button onclick="printPage()">출석 인쇄</button>
+            <button onclick="exelDownloadByHtml()">엑셀 다운</button>
+            <table id="myTable">
+                <thead>
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>시간</th>
+                        <th>구분</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceBody">
+                    <!-- 데이터는 여기에 동적으로 추가 -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+            <img src="/public/files/footerlogo.png">
+            <span>우송비트 교육센터</span>
+        </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+    
+    <script>
+        //변수 선언 및 초기화,  버튼이벤트 등록
+        const contentDiv = document.getElementById('content');
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const logoutBtn = document.getElementById('logoutBtn');
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file');
+
+        // 전체 출석 현황 페이지의 JavaScript 실행
+        const datePicker_start = document.getElementById('datePicker_start'); // 날짜를 선택할 수 있는 입력 필드
+        const datePicker_end = document.getElementById('datePicker_end'); // 날짜를 선택할 수 있는 입력 필드
+        const attendanceBody = document.getElementById('attendanceBody'); // 출석 정보를 표시할 테이블의 본문 부분
+
+        // 오늘 날짜를 선택하여 날짜 입력 필드에 설정
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayString = `${year}-${month}-${day}`;
+
+        datePicker_start.value = todayString; // 날짜 입력 필드의 값으로 오늘 날짜를 설정
+        datePicker_end.value = todayString
+
+         // 개인정보 수정 버튼 클릭 시
+         editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/editinfo')
+        });
+
+        // 개인출석 버튼 클릭 시
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/check')
+        });
+
+        // 전체출석 버튼 클릭 시
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/allcheck');
+        });
+
+        // 파일 버튼 클릭 시
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '/files');
+        });
+
+        // 로그아웃 버튼 클릭 시
+        logoutBtn.addEventListener('click', function () {
+            // 실제로는 서버에서 세션을 삭제하고 로그아웃 처리해야 함
+            alert('로그아웃 되었습니다.');
+            window.location.href = '/'; // 로그아웃 후 로그인 페이지로 이동 (실제로는 서버에서 리다이렉트를 수행)
+        });
+
+        // 홈 버튼 클릭 시
+        homeBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/allcheck', '');
+        });
+
+    </script>
+    <script>
+        // 함수
+        // 출석 현황 데이터를 가져와서 테이블에 표시하는 함수
+        function GetData() {
+            const Date_start = datePicker_start.value;
+            const Date_end = datePicker_end.value;
+
+            // 이전에 표시된 행 삭제
+            attendanceBody.innerHTML = '';
+
+            // 선택한 날짜에 해당하는 출석 현황 데이터를 가져옴 (서버에 POST 요청)
+            fetch('/attendanceall', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startdate: Date_start, enddate: Date_end })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // 데이터를 테이블에 추가
+                    data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td>${student.stunum}</td>
+                        <td>${student.name}</td>
+                        <td>${student.date}</td>  
+                        <td>${student.state == 1 ? '입실' : '퇴실'}</td>  `;
+                        attendanceBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching attendance data:', error));
+        }
+
+        // 페이지의 URL에서 특정 부분을 다른 값으로 대체하여 새로운 URL로 이동하는 함수
+        function ReplaceLink(link, mlink, plink) {
+            if (link.includes('#')) {
+                // 첫 번째 '#'을 plink로 대체한 후 새로운 URL로 이동
+                window.location.href = link.replace(mlink + "#", plink)
+            }
+            else {
+                // '#'이 포함되지 않은 경우, mlink를 plink로 대체한 후 새로운 URL로 이동
+                window.location.href = link.replace(mlink, plink)
+            }
+        }
+
+        function exelDownloadByHtml() {
+            let filename = '전체출석_';
+
+            // 파일 이름에 선택된 날짜를 추가합니다
+            filename += datePicker_start.value + "~" + datePicker_end.value + '.xlsx';
+
+            // 'myTable' ID를 가진 테이블을 사용하도록 table_to_book 함수 수정
+            let wb = XLSX.utils.table_to_book(document.getElementById('myTable'), { sheet: 'attend', raw: true });
+            XLSX.writeFile(wb, filename);
+        }
+
+        function printPage() {
+            window.print();
+        }
+    </script>
+
+</body>
+
+</html>

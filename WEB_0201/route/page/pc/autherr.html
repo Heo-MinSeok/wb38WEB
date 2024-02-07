@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+
+
+
+<body onload="timer()">
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span>
+    </button>
+    <button id="logoutBtn">로그아웃</button>
+
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <h2>사용자 인증 실패...</h2>
+    <h3 id = "timertxt">5초뒤 로그인 화면으로 돌아갑니다 ...</h3>
+
+    <footer>
+        <p><a href="https://itedu.wsu.ac.kr:444/page/index.jsp?code=itedu0201" target="_blank">
+            <img src="https://lh3.googleusercontent.com/proxy/lhEs6TxckbtrraPOnx4_MMt3s9SQCWdshchgMCj1wftFbDENTvtWVbDL7ORE-n8enuGkoxHv4q1nHp5p0894ouoeIMgZEzKA">
+            <span>우송비트 교육센터</span>
+        </a></p>
+        <p>Copyrigh 2024 All ⓒ rights reserved.</p>
+    </footer>
+    
+</body>
+<script>
+    const txt = document.getElementById("timertxt");
+    // 실행 주기 (초 단위)
+    const intervalSeconds = 1;
+
+    // setInterval을 사용하여 주기적으로 함수 실행
+    const intervalId = setInterval(timer, intervalSeconds * 1000);
+
+    // n 초 후에
+    const stopAfterSeconds = 3;
+    var sec = 3;
+    // 실행할 함수
+    function timer() {
+
+        txt.innerText = (`${sec} 초뒤 로그인 화면으로 돌아갑니다 ...`);
+        sec--;
+    }
+
+
+    setTimeout(() => {
+        clearInterval(intervalId);
+       window.location.href = '/';
+    }, stopAfterSeconds * 1000);
+</script>

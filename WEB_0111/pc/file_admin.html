@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>민석이와IDLE</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+    <!-- jQuery 라이브러리 불러오기 -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+</head>
+
+<body onload="loadFileList()">
+
+    <button id="homeBtn">
+        <span class="black">민석이와</span>
+        <span class="red">I</span>
+        <span class="orange">D</span>
+        <span class="green">L</span>
+        <span class="blue">E</span></button>
+    <span><button id="logoutBtn">로그아웃</button></span>
+    <nav id="main" class="SMN_effect-70">
+        <ul>
+            <li><a href="#" id="personalAttendance">출석</a></li>
+            <li><a href="#" id="editInfo">개인 정보 수정</a></li>
+            <li><a href="#" id="details">전체 출석 현황</a></li>
+            <li><a href="#" id="file">파일</a></li>
+        </ul>
+    </nav>
+
+    <section>
+        <ul id="fileList">
+            <!-- 업로드된 파일 목록이 여기에 표시됩니다 -->
+        </ul>
+    </section>
+
+    <section>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" id="fileInput" name="file" required>
+            <input type="submit" value="업로드">
+        </form>
+    </section>
+
+
+    <script>
+
+        const editInfoLink = document.getElementById('editInfo');                       // 개인정보수정
+        const personalAttendanceLink = document.getElementById('personalAttendance');   // 개인출석
+        const detailsLink = document.getElementById('details');                         // 전체출석
+        const logoutBtn = document.getElementById('logoutBtn');                            
+        const homeBtn = document.getElementById('homeBtn');
+        const fileBtn = document.getElementById('file');
+
+
+        editInfoLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files', '/mypage')
+        });
+
+        personalAttendanceLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files', '/check')
+        });
+
+        detailsLink.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files', '/allcheck');
+        });
+        
+        fileBtn.addEventListener('click', function () {
+            ReplaceLink(window.location.href, '/files', '/files');
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var formData = new FormData(this);
+
+            fetch(window.location.pathname + '/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadFileList();
+                })
+                .catch((error) => {
+                    alert('업로드 에러:', error);
+                });
+        });
+
+        function loadFileList() {
+            fetch('/filelist', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(files => {
+                    var fileListElement = document.getElementById('fileList');
+                    fileListElement.innerHTML = '';
+
+                    files.forEach(file => {
+                        if (file == '.DS_Store') {
+                            return;
+                        }
+                        var li = document.createElement('li');
+                        li.textContent = file;
+
+                        var div = document.createElement('div');
+                        // 다운로드 링크 추가
+
+                        // 파일 이름과 확장자 추출
+                        var fileName = file.split('.').shift();
+                        var fileExtension = file.split('.').pop();
+
+                        var downloadLink = document.createElement('a');
+                        downloadLink.download = fileName +'.'+ fileExtension;
+                        downloadLink.href = '/public/files/' + encodeURIComponent(file);
+                        downloadLink.textContent = '다운로드';
+
+                        // 삭제 링크 추가
+                        var deleteLink = document.createElement('button');
+                        deleteLink.textContent = '삭제';
+                        deleteLink.style.background = 'red';
+                        var link = './public/files/' + encodeURIComponent(file)
+                        deleteLink.onclick = function () {
+                            const data = {
+                                link: link,
+                            };
+                            fetch('/filedelete', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(data)
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    alert(data.message);
+                                    loadFileList();
+
+                                })
+                                .catch((error) => {
+                                    alert('삭제 실패:', error);
+                                });
+                        }
+
+                        // li 엘리먼트에 추가
+                        div.appendChild(downloadLink);
+                        div.appendChild(deleteLink);
+
+                        li.appendChild(div);
+
+                        // fileList에 li 엘리먼트 추가
+                        fileListElement.appendChild(li);
+                    });
+                })
+                .catch((error) => {
+                    console.error('파일 목록 로드 에러:', error);
+                });
+        }
+
+        function ReplaceLink(link, mlink, plink) {
+            if (link.includes('#')) {
+                window.location.href = link.replace(mlink + "#", plink)
+            }
+            else {
+                window.location.href = link.replace(mlink, plink)
+            }
+        }
+    </script>
+
+</body>
+
+</html>
